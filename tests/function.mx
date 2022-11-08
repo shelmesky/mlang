@@ -1,0 +1,22 @@
+namespace main
+
+use "format"
+
+function add_two(aaa: uint64, bbb: uint64) -> uint64 {
+    let a,b,c: uint64 = 123
+    return aaa + 123
+}
+
+function print_string(str: string) {
+    printf("%s\n", str)
+}
+
+function main() -> uint64 {
+    let x: string = "%s\n"
+    let a: string = "你好, mlang"
+    printf(x, a)
+    print_string(a)
+    printf("%d\n", add_two(123, 456))
+    let b: string
+    return 0
+}

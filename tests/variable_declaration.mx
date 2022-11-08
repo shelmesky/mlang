@@ -1,0 +1,10 @@
+namespace main
+
+use "format"
+
+function main() -> int64 {
+    let a: int = 1
+    let b,c: int = 2
+    let d,e,f: int = 3,4,5
+    return 0
+}
