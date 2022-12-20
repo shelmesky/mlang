@@ -1,6 +1,6 @@
 namespace main
 
-use "format"
+use "fmt"
 
 function func() -> int {
     return 456

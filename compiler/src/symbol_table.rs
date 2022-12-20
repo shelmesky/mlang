@@ -49,9 +49,15 @@ impl<'a> SymbolTable<'a> {
         Err(anyhow::Error::msg(format!("can not find symbol {}", name)))
     }
 
+    // insert variable into symbol table
+    // @name: variable name
+    // @is_variable: if symbol is a variable
+    // @compile_type: compile time type of symbol
+    // @llvm_value_enum: llvm value of symbol
     pub fn set_var<'x: 'a>(
         &mut self,
         name: String,
+        is_variable: bool,
         compile_type: compile_type::Type<'x>,
         llvm_value_enum: llvm_values::BasicValueEnum<'x>,
     ) {
@@ -59,7 +65,7 @@ impl<'a> SymbolTable<'a> {
             compile_type,
             llvm_value: llvm_value_enum,
             llvm_func_value: None,
-            is_variable: false,
+            is_variable,
             is_global: false,
         };
         self.do_set_var(name, compile_value);

@@ -1,6 +1,6 @@
 namespace main
 
-use "format"
+use "fmt"
 
 function add_two(aaa: uint64, bbb: uint64) -> uint64 {
     let a,b,c: uint64 = 123

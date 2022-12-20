@@ -377,6 +377,8 @@ impl<'a, 'ctx> Compiler<'a, 'ctx> {
                         let compile_type = compile_func_args_types.get(idx).unwrap().clone();
                         self.symbol_table.set_var(
                             each_arg_name.clone(),
+                            // argument of function is a variable, must be loaded before use it
+                            true,
                             compile_type.clone(),
                             pointer_value.as_basic_value_enum(),
                         );
@@ -537,6 +539,14 @@ impl<'a, 'ctx> Compiler<'a, 'ctx> {
 
                 compile_types::Type::SliceTypeEnum(compile_slice_type)
             }
+            Type::Pointer(pointer_ast_type) => {
+                let pointer_type = Compiler::convert_type(
+                    compiler,
+                    pkg.clone(),
+                    pointer_ast_type.typ.deref().clone(),
+                );
+                compile_types::Type::from_pointer_type(pointer_type.clone())
+            }
             t => {
                 println!("convert_type: unknown type {:?}", t);
                 panic!("convert_type: unknown type");
@@ -615,7 +625,11 @@ impl<'a, 'ctx> Compiler<'a, 'ctx> {
             llvm_type: func_type,
             return_type: compile_types::Type::PointerTypeEnum(Box::new(
                 compile_types::CompilePointerType {
-                    point_to: Some(int8_type),
+                    point_to: Some(int8_type.clone()),
+                    llvm_type: int8_type
+                        .llvm_basic_type_enum()
+                        .unwrap()
+                        .ptr_type(AddressSpace::Generic),
                 },
             )),
             is_variadic: is_variadic_args,

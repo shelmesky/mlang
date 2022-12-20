@@ -23,11 +23,9 @@ impl<'a> Type<'a> {
         match self {
             Type::IntTypeEnum(int_type) => Some(int_type.llvm_type.as_basic_type_enum()),
             Type::FunctionTypeEnum(..) => None,
-            Type::PointerTypeEnum(pointer_value) => pointer_value
-                .point_to
-                .as_ref()
-                .expect("CompilePointerType point to None")
-                .llvm_basic_type_enum(),
+            Type::PointerTypeEnum(pointer_value) => {
+                Some(pointer_value.llvm_type.as_basic_type_enum())
+            }
             Type::StringTypeEnum(string_type) => Some(string_type.llvm_type.as_basic_type_enum()),
             Type::ArrayTypeEnum(array_type) => Some(array_type.llvm_type.as_basic_type_enum()),
             Type::SliceTypeEnum(slice_type) => Some(slice_type.llvm_type.as_basic_type_enum()),
@@ -45,6 +43,13 @@ impl<'a> Type<'a> {
     pub fn to_compile_function_type(&self) -> Option<CompileFunctionType<'a>> {
         match self {
             Type::FunctionTypeEnum(function_struct) => Some(function_struct.deref().clone()),
+            _ => None,
+        }
+    }
+
+    pub fn to_compile_pointer_type(&self) -> Option<CompilePointerType<'a>> {
+        match self {
+            Type::PointerTypeEnum(pointer_type) => Some(pointer_type.deref().clone()),
             _ => None,
         }
     }
@@ -88,7 +93,11 @@ impl<'a> Type<'a> {
 
     pub fn from_pointer_type(pointer_type: Type<'a>) -> Self {
         Type::PointerTypeEnum(Box::new(CompilePointerType {
-            point_to: Some(pointer_type),
+            point_to: Some(pointer_type.clone()),
+            llvm_type: pointer_type
+                .llvm_basic_type_enum()
+                .unwrap()
+                .ptr_type(AddressSpace::Generic),
         }))
     }
 
@@ -118,6 +127,7 @@ impl<'a> Type<'a> {
 #[derive(Debug, Clone)]
 pub struct CompilePointerType<'a> {
     pub point_to: Option<Type<'a>>,
+    pub llvm_type: llvm_types::PointerType<'a>,
 }
 
 #[derive(Debug, Clone)]

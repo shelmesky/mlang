@@ -3,9 +3,9 @@ use std::ops::Deref;
 
 use crate::compiler::Compiler;
 
-use inkwell::values::BasicValue;
+use inkwell::values::{BasicValue, BasicValueEnum};
 
-use parser::ast::{DeclStmt, Statement};
+use parser::ast::{DeclStmt, Expression, Statement};
 use parser::token::Keyword;
 
 impl<'a, 'ctx> Compiler<'a, 'ctx> {
@@ -198,18 +198,20 @@ impl<'a, 'ctx> Compiler<'a, 'ctx> {
                         panic!("Statement::Assign left is not pointer value")
                     }
 
-                    if right_compile_value.llvm_value.is_pointer_value() {
+                    let mut loaded_right_value: BasicValueEnum =
+                        right_compile_value.llvm_value.as_basic_value_enum();
+
+                    // load the llvm value if it is a variable
+                    if right_compile_value.is_variable {
                         self.builder.build_store(
                             left_compile_value.llvm_value.into_pointer_value(),
-                            self.builder.build_load(
-                                right_compile_value.llvm_value.into_pointer_value(),
-                                "",
-                            ),
+                            self.builder
+                                .build_load(loaded_right_value.into_pointer_value(), ""),
                         );
                     } else {
                         self.builder.build_store(
                             left_compile_value.llvm_value.into_pointer_value(),
-                            right_compile_value.llvm_value,
+                            loaded_right_value.as_basic_value_enum(),
                         );
                     }
                 }
@@ -307,6 +309,7 @@ impl<'a, 'ctx> Compiler<'a, 'ctx> {
 
                                 self.symbol_table.set_var(
                                     variable_name,
+                                    true, // insert variable into symbol table
                                     compile_variables_type.clone(),
                                     llvm_value.as_basic_value_enum(),
                                 );
@@ -342,6 +345,7 @@ impl<'a, 'ctx> Compiler<'a, 'ctx> {
 
                                 self.symbol_table.set_var(
                                     variable_name,
+                                    true, // insert variable into symbol table
                                     compile_variables_type.clone(),
                                     llvm_left_value.as_basic_value_enum(),
                                 );

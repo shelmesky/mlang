@@ -18,7 +18,7 @@ use unescape::unescape;
 use crate::compiler::Compiler;
 use parser::ast::Expression::CompositeLit;
 use parser::ast::{Element, Expression, Type};
-use parser::token::LitKind;
+use parser::token::{LitKind, Operator};
 
 impl<'a, 'ctx> compiler::Compiler<'a, 'ctx> {
     pub fn compile_expression(
@@ -46,7 +46,8 @@ impl<'a, 'ctx> compiler::Compiler<'a, 'ctx> {
                 // convert from compile Value to llvm BasicMetadataValueEnum
                 let args_basic_value_enum = compiled_args_value
                     .iter()
-                    .map(|arg_value| {
+                    .zip(function_call.args)
+                    .map(|(arg_value, arg_ast_expr)| {
                         // if we call printf function
                         // and the arguments is string type or slice type
                         // use the data pointer instead the struct itself
@@ -66,16 +67,18 @@ impl<'a, 'ctx> compiler::Compiler<'a, 'ctx> {
                                 .unwrap();
                             BasicMetadataValueEnum::from(extracted_value)
                         } else {
+                            let mut arg_value_enum = arg_value.llvm_value.as_basic_value_enum();
+
                             // common function calling
-                            // load the llvm value if it is pointer value
-                            if arg_value.llvm_value.is_pointer_value() {
+                            // load the llvm value if it is a variable
+                            if arg_value.is_variable {
                                 let loaded_value = self
                                     .builder
-                                    .build_load(arg_value.llvm_value.into_pointer_value(), "");
+                                    .build_load(arg_value_enum.into_pointer_value(), "");
                                 BasicMetadataValueEnum::from(loaded_value)
                             } else {
                                 // not pointer value, like IntValue
-                                BasicMetadataValueEnum::from(arg_value.llvm_value)
+                                BasicMetadataValueEnum::from(arg_value_enum)
                             }
                         }
                     })
@@ -529,9 +532,58 @@ impl<'a, 'ctx> compiler::Compiler<'a, 'ctx> {
                 )),
             },
             Expression::Range(_) => Err(anyhow::Error::msg("Expression::Range unimplemented")),
-            Expression::Star(_) => Err(anyhow::Error::msg("Expression::Star unimplemented")),
+            Expression::Star(star_expression) => {
+                let star_expr_value = self.compile_expression(*star_expression.right);
+                let expr_value = star_expr_value.unwrap();
+
+                if expr_value.llvm_value.is_pointer_value() {
+                    let loaded_value = self
+                        .builder
+                        .build_load(expr_value.llvm_value.into_pointer_value(), "load-ptr");
+
+                    let star_expr_type =
+                        compile_types::Type::from_pointer_type(expr_value.clone().compile_type);
+
+                    let compile_star_value = Value {
+                        compile_type: star_expr_type,
+                        llvm_value: loaded_value.as_basic_value_enum(),
+                        llvm_func_value: None,
+                        // *a is a temporary variable, will used in expression evaluation
+                        is_variable: true,
+                        is_global: false,
+                    };
+
+                    return Ok(compile_star_value);
+                }
+                Ok(expr_value)
+            }
             Expression::Paren(_) => Err(anyhow::Error::msg("Expression::Paren unimplemented")),
-            Expression::Unary(_) => Err(anyhow::Error::msg("Expression::Unary unimplemented")),
+            Expression::Unary(unary_expression) => {
+                let operator = unary_expression.op;
+                match operator {
+                    // x = &y
+                    Operator::And => {
+                        let get_reference_expr_value =
+                            self.compile_expression(*unary_expression.right);
+                        let expr_value = get_reference_expr_value.unwrap();
+                        let get_reference_pointer_type =
+                            compile_types::Type::from_pointer_type(expr_value.clone().compile_type);
+
+                        let compile_reference_value = Value {
+                            compile_type: get_reference_pointer_type,
+                            llvm_value: expr_value.clone().llvm_value,
+                            llvm_func_value: None,
+                            // result of '&x' expression evaluation is temporary value, not a variable
+                            is_variable: false,
+                            is_global: false,
+                        };
+                        Ok(compile_reference_value)
+                    }
+                    _ => Err(anyhow::Error::msg(
+                        "Expression::Unary unary operator unimplemented",
+                    )),
+                }
+            }
             Expression::Binary(binary_expr) => self.compile_binary(binary_expr),
             Expression::TypeAssert(_) => {
                 Err(anyhow::Error::msg("Expression::TypeAssert unimplemented"))

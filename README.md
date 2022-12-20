@@ -32,76 +32,12 @@ function main() -> int64 {
     let a: int = 1
     let b,c: int = 2
     let d,e,f: int = 3,4,5
-    let s: string = "你好，世界!"
     return 0
 }
 ```
 
 
-**for循环**
 
-```rust
-namespace main
-
-use "format"
-
-function main() -> int {
-    let j: int = 0
-    let k: int = 0
-
-    for j=0; j<3; j=j+1 {
-        printf("outer loop: %d\n", j)
-
-        for k=0; k<3; k=k+1 {
-            printf("inner loop: %d\n", k)
-        }
-    }
-
-    let i: int = 0
-
-    for i=0; i<10; i=i+1 {
-        if i > 6 {
-            break
-        }
-        printf("i value: %d\n", i)
-    }
-
-    let m: int = 0
-    for m=0; m<10; m=m+1 {
-        if m == 4 {
-            continue
-        }
-        printf("m value: %d\n", m)
-    }
-
-    return 0
-}
-```
-
-
-**if语句**
-
-```rust
-namespace main
-
-use "format"
-
-function main() -> int {
-    let a: int = 1
-    let b: int = 2
-    let c: int = 3
-
-    if a < b {
-        if c > b {
-            printf("%d < %d\n", a, b)
-        }
-    } else {
-       printf("%d > %d\n", a, b)
-    }
-
-    return 0
-}
-```
 
 
 **函数**
@@ -130,6 +66,43 @@ function main() -> uint64 {
     return 0
 }
 ```
+
+
+
+**指针**
+
+
+
+```rust
+namespace main
+
+use "format"
+
+function main() -> uint64 {
+    let ptr: *int
+    let a: int = 123
+    ptr = &a
+
+    let ptr1: **int
+    ptr1 = &ptr
+
+    let ptr2: ***int
+    ptr2 = &ptr1
+
+    let b: int
+    b = ***ptr2
+
+    printf("%d\n", b)
+    printf("%d\n", *ptr)
+    printf("%d\n", **ptr1)
+    printf("%d\n", ***ptr2)
+
+    return 0
+}
+```
+
+
+
 
 
 **数组**
@@ -253,6 +226,78 @@ function main() -> int64 {
     return 0
 }
 ```
+
+
+
+**for循环**
+
+
+
+```rust
+namespace main
+
+use "format"
+
+function main() -> int {
+    let j: int = 0
+    let k: int = 0
+
+    for j=0; j<3; j=j+1 {
+        printf("outer loop: %d\n", j)
+
+        for k=0; k<3; k=k+1 {
+            printf("inner loop: %d\n", k)
+        }
+    }
+
+    let i: int = 0
+
+    for i=0; i<10; i=i+1 {
+        if i > 6 {
+            break
+        }
+        printf("i value: %d\n", i)
+    }
+
+    let m: int = 0
+    for m=0; m<10; m=m+1 {
+        if m == 4 {
+            continue
+        }
+        printf("m value: %d\n", m)
+    }
+
+    return 0
+}
+```
+
+
+
+**if语句**
+
+```rust
+namespace main
+
+use "format"
+
+function main() -> int {
+    let a: int = 1
+    let b: int = 2
+    let c: int = 3
+
+    if a < b {
+        if c > b {
+            printf("%d < %d\n", a, b)
+        }
+    } else {
+       printf("%d > %d\n", a, b)
+    }
+
+    return 0
+}
+```
+
+
 
 正在开发的语言特性：
 

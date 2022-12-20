@@ -1,6 +1,6 @@
 namespace main
 
-use "format"
+use "fmt"
 
 function main() -> int {
     let j: int = 0
