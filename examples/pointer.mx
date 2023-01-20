@@ -1,0 +1,32 @@
+namespace main
+
+use "fmt"
+
+function main() -> uint64 {
+    let ptr: *int
+    let a: int = 123
+    ptr = &a
+
+    let ptr1: **int
+    ptr1 = &ptr
+
+    let ptr2: ***int
+    ptr2 = &ptr1
+
+    let b: int
+    b = ***ptr2
+
+    printf("%d\n", b)
+    printf("%d\n", *ptr)
+    printf("%d\n", **ptr1)
+    printf("%d\n", ***ptr2)
+
+    return 0
+}
+
+// args: build --run-binary=true --delete-binary=true --path
+// expected stdout:
+// 123
+// 123
+// 123
+// 123

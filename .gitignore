@@ -1,0 +1,7 @@
+/target
+.idea/
+*.ll
+*.o
+*.obj
+*.out
+*.s

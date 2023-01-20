@@ -1,0 +1,33 @@
+namespace main
+
+use "fmt"
+
+function main() -> int {
+    let a: int = 1
+    let b: int = 2
+    let c: int = 3
+    printf("%d\n", b)
+
+    if a < b {
+        let b: int = 123
+        printf("%d\n", b)
+
+        if c > b {
+            printf("%d < %d\n", a, b)
+        }
+
+    } else {
+       printf("%d\n", b)
+       printf("%d > %d\n", a, b)
+    }
+
+    printf("%d\n", b)
+
+    return 0
+}
+
+// args: build --run-binary=true --delete-binary=true --path
+// expected stdout:
+// 2
+// 123
+// 2

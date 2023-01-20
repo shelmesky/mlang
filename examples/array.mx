@@ -1,0 +1,35 @@
+namespace main
+
+use "fmt"
+
+function func() -> int {
+    return 456
+}
+
+
+function main() -> uint64 {
+    let b: int = 123;
+    let a: [4]int = [4]int{1, 2, func(), b}
+    printf("a: [%d, %d, %d, %d]\n", a[0], a[1], a[2], a[3])
+
+    let c: string = "ccc"
+    let d: [3]string = [3]string{"aaa", "bbb", c}
+    printf("d: [%s, %s, %s]\n", d[0], d[1], d[2])
+
+    let e: [2][2]int = [2][2]int{{1,2}, {3,4}}
+
+    let f: [2][2][2]int = [2][2][2]int{{{1,2},{3,4}}, {{5,6},{7,8}}}
+
+    printf("%d\n", e[0][0])
+    e[0] = [2]int{111, 222}
+    printf("%d\n", e[0][0])
+
+    return 0
+}
+
+// args: build --run-binary=true --delete-binary=true --path
+// expected stdout:
+// a: [1, 2, 456, 123]
+// d: [aaa, bbb, ccc]
+// 1
+// 111

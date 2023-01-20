@@ -1,0 +1,16 @@
+namespace main
+
+use "format"
+
+function main() -> int64 {
+    let a: int = 1
+    let b,c: int = 2
+    let d,e,f: int = 3,4,5
+    let s: string = "hello mlang"
+    printf("%d, %s\n", b, s)
+    return 0
+}
+
+// args: build --run-binary=true --delete-binary=true --path
+// expected stdout:
+// 2, hello mlang

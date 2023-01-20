@@ -1,0 +1,26 @@
+namespace main
+
+use "format"
+
+function main() -> int64 {
+    let a: []int = []int{1,2,3}
+    let b: int = a[1]
+    printf("%d\n", b)
+
+    let c: [][]int = [][]int{{1,2,3}, {4,5,6}}
+    let d: []int = c[1]
+    let e: int = d[2]
+    printf("%d\n", e)
+
+    let f: [][]int = [][]int{{1,2,3}, {4,5,6}}
+    // this line will cause 'runtime panic:index out of range'
+    let g: []int = f[6]
+
+    return 0
+}
+
+// args: build --run-binary=true --delete-binary=true --path
+// expected stdout:
+// 2
+// 6
+// runtime panic:index out of range
